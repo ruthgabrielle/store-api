@@ -20,8 +20,11 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 import store.views
+import store.api_views
 
 urlpatterns = [
+    path('api/v1/products', store.api_views.ProductList.as_view()),
+
     path('admin/', admin.site.urls),
     path('products/<int:id>', store.views.show, name='show-product'),
     path('cart/', store.views.index, name='shopping-cart'),
