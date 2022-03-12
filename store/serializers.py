@@ -20,7 +20,7 @@ class ProductSerializer(serializers.ModelSerializer):
     sale_start = serializers.DateTimeField(input_formats=['%I:%M %p %d %B %Y'], format=None, allow_null=True,
                                            help_text="Accepted format is '12:01 PM 15 April 2022'", style={'input_type': 'text', 'placeholder': '12:01 AM 28 July 2022'})
     sale_end = serializers.DateTimeField(input_formats=['%I:%M %p %d %B %Y'], format=None, allow_null=True,
-                                           help_text="Accepted format is '12:01 PM 15 April 2022'", style={'input_type': 'text', 'placeholder': '12:01 AM 28 July 2022'})
+                                         help_text="Accepted format is '12:01 PM 15 April 2022'", style={'input_type': 'text', 'placeholder': '12:01 AM 28 July 2022'})
 
     class Meta:
         model = Product
@@ -29,3 +29,11 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_cart_items(self, instance):
         items = ShoppingCartItem.objects.filter(product=instance)
         return CartItemSerializer(items, many=True).data
+
+
+class ProductStatSerializer(serializers.Serializer):
+    stats = serializers.DictField(
+        child=serializers.ListField(
+            child=serializers.IntegerField(),
+        )
+    )

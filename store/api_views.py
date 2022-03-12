@@ -1,16 +1,20 @@
+from cgitb import lookup
 from itertools import product
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView, GenericAPIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
 
-from store.serializers import ProductSerializer
+from store.serializers import ProductSerializer, ProductStatSerializer
 from store.models import Product
+
 
 class ProductsPagination(LimitOffsetPagination):
     default_limit = 10
     max_limit = 100
+
 
 class ProductList(ListAPIView):
     queryset = Product.objects.all()
@@ -30,10 +34,11 @@ class ProductList(ListAPIView):
             from django.utils import timezone
             now = timezone.now()
             return queryset.filter(
-                sale_start__lte=now, 
+                sale_start__lte=now,
                 sale_end__gte=now
             )
         return queryset
+
 
 class ProductCreate(CreateAPIView):
     serializer_class = ProductSerializer
@@ -47,6 +52,7 @@ class ProductCreate(CreateAPIView):
             raise ValidationError({'price': 'A valid number is required'})
         return super().create(request, *args, **kwargs)
 
+
 class ProductRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     lookup_field = 'id'
@@ -59,7 +65,7 @@ class ProductRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
             from django.core.cache import cache
             cache.delete('product_data_{}'.format(product_id))
         return response
-    
+
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
         if response.status_code == 200:
@@ -71,3 +77,20 @@ class ProductRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
                 'price': product['price']
             })
         return response
+
+
+class ProductStats(GenericAPIView):
+    lookup_field = 'id'
+    serializer_class = ProductStatSerializer
+    queryset = Product.objects.all()
+
+    def get(self, request, format=None, id=None):
+        obj = self.get_object()
+        serializer = ProductStatSerializer({
+            'stats': {
+                '2022-03-01': [5, 10, 15],
+                '2022-03-02': [4, 12, 1],
+
+            }
+        })
+        return Response(serializer.data)
