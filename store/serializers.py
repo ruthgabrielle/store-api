@@ -15,8 +15,12 @@ class ProductSerializer(serializers.ModelSerializer):
     current_price = serializers.FloatField(read_only=True)
     description = serializers.CharField(min_length=2, max_length=200)
     cart_items = serializers.SerializerMethodField()
-    price = serializers.FloatField(min_value=1, max_value=10000)
+    # price = serializers.FloatField(min_value=1, max_value=10000)
     price = serializers.DecimalField(min_value=1, max_value=10000, max_digits=None, decimal_places=2)
+    sale_start = serializers.DateTimeField(input_formats=['%I:%M %p %d %B %Y'], format=None, allow_null=True,
+                                           help_text="Accepted format is '12:01 PM 15 April 2022'", style={'input_type': 'text', 'placeholder': '12:01 AM 28 July 2022'})
+    sale_end = serializers.DateTimeField(input_formats=['%I:%M %p %d %B %Y'], format=None, allow_null=True,
+                                           help_text="Accepted format is '12:01 PM 15 April 2022'", style={'input_type': 'text', 'placeholder': '12:01 AM 28 July 2022'})
 
     class Meta:
         model = Product
